@@ -9,14 +9,20 @@ struct Node {
 // Floyd's cycle-finding algorithm (Tortoise and Hare)
 bool hasCycle(Node* head) {
     if (!head) return false;
+
     Node* slow = head;
-    Node* fast = head->next;
+    Node* fast = head;
+
     while (fast && fast->next) {
-        if (slow == fast) return true;
-        slow = slow->next;
-        fast = fast->next->next;
+        slow = slow->next;           // move 1 step
+        fast = fast->next->next;     // move 2 steps
+
+        if (slow == fast) {
+            return true;             // cycle detected
+        }
     }
-    return false;
+
+    return false;                    // no cycle
 }
 
 // Helper to create a singly linked list with n nodes. Returns head and optionally
@@ -27,15 +33,19 @@ Node* createList(int n, Node** outLinkNode = nullptr, int linkIndex = -1) {
         if (outLinkNode) *outLinkNode = nullptr;
         return nullptr;
     }
+
     Node* head = new Node(1);
     Node* tail = head;
     Node* linkNode = nullptr;
+
     if (linkIndex == 0) linkNode = head;
 
     for (int i = 2; i <= n; ++i) {
         tail->next = new Node(i);
         tail = tail->next;
-        if (i - 1 == linkIndex) linkNode = tail; // linkIndex is 0-based
+
+        if (i - 1 == linkIndex)
+            linkNode = tail;  // linkIndex is 0-based
     }
 
     if (outLinkNode) *outLinkNode = linkNode;
@@ -56,27 +66,27 @@ int main() {
 
     // --- Test 1: List with NO cycle ---
     Node* head1 = createList(N);
-      std::cout <<  (hasCycle(head1) ? "true " : "false ");
-    // clean up
+    std::cout << (hasCycle(head1) ? "true " : "false ");
     deleteList(head1);
 
     // --- Test 2: List WITH a cycle ---
-    // Re-create the list and make the last node point to node at index 500 (0-based)
     Node* linkNode = nullptr;
-    Node* head2 = createList(N, &linkNode, 500); // linkNode points to node #501
-    // find tail
+    Node* head2 = createList(N, &linkNode, 500);
+
     Node* tail = head2;
-    while (tail && tail->next) tail = tail->next;
+    while (tail && tail->next)
+        tail = tail->next;
+
     if (tail) {
         tail->next = linkNode; // create cycle
-     } else {
-        std::cout << "Test 2 - Unexpected: tail is null.\n";
     }
 
     std::cout << (hasCycle(head2) ? "true" : "false") << "\n";
 
-    // Break the cycle (so we can delete safely)
-    if (tail) tail->next = nullptr;
+    // Break the cycle so we can delete safely
+    if (tail)
+        tail->next = nullptr;
+
     deleteList(head2);
 
     return 0;
